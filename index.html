@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Debug My Robot — community hardware support</title>
+<meta name="description" content="A Q&A community where people post problems with their robots, circuits, and dev boards — and the people who actually solve them get paid in reputation." />
+<style>
+  :root{
+    --bg:#E9EDE4; --panel:#ffffff; --ink:#16281F; --muted:#5C6B5C;
+    --line:#C6CEBE; --green:#2E5A43; --rust:#B4531F; --wash:#F1F6F0;
+    --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    background-image:radial-gradient(#C6CEBE 1px,transparent 1px);background-size:22px 22px;
+    padding-bottom:80px;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px}
+  header{position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line);background:rgba(233,237,228,.96);backdrop-filter:blur(6px)}
+  .hrow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;gap:12px}
+  h1{font-family:var(--mono);font-size:18px;margin:0;letter-spacing:-.5px}
+  h1 span{color:var(--rust)}
+  .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:2px 0 0}
+  .who{text-align:right;font-family:var(--mono);font-size:12px}
+  .who small{display:block;color:var(--muted);font-size:10px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+  .sec{margin:24px 0 8px;display:flex;align-items:center;gap:12px}
+  .sec b{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--green);font-weight:400}
+  .sec i{flex:1;height:1px;background:var(--line)}
+  h2{font-family:var(--mono);font-size:20px;margin:0 0 4px;line-height:1.3}
+  h3{font-family:var(--mono);font-size:16px;margin:0;line-height:1.35}
+  p{line-height:1.6;margin:8px 0}
+  label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px}
+  input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:var(--sans);font-size:14px;background:#fff;color:var(--ink)}
+  textarea.code,input.code{font-family:var(--mono);font-size:12px}
+  button{font-family:var(--mono);cursor:pointer;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 12px;font-size:12px}
+  button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--rust);outline-offset:2px}
+  .primary{background:var(--green);color:#fff;border-color:var(--green);width:100%;padding:12px;font-size:14px}
+  .primary[disabled]{opacity:.4;cursor:not-allowed}
+  .ghost{border-color:var(--green);color:var(--green);background:#fff}
+  .danger{border-color:var(--rust);color:var(--rust)}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+  .meta{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .open{color:var(--rust)} .solved{color:var(--green)}
+  pre{margin:0;padding:0 12px 12px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.6;color:#D7E6DB;white-space:pre-wrap}
+  .codewrap{background:#1B3327;border-radius:12px;margin-top:12px;overflow:hidden}
+  .codewrap button{width:100%;background:transparent;border:0;color:#9DBFAA;text-align:left;display:flex;justify-content:space-between;padding:8px 12px;font-size:10px;letter-spacing:.15em;text-transform:uppercase}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;vertical-align:middle}
+  table{width:100%;border-collapse:collapse}
+  td{padding:10px 12px;border-bottom:1px solid #E2E7DE;font-size:14px}
+  tr:last-child td{border-bottom:0}
+  tr.hit{background:var(--wash)}
+  td.n{font-family:var(--mono);font-weight:700;width:60px}
+  .ledger{border:1px dashed #9DA89A;background:#F6F8F3;border-radius:16px;padding:14px;font-family:var(--mono);font-size:12px}
+  .ledger div{display:flex;gap:12px;padding:6px 0;border-bottom:1px dashed #D5DCD0}
+  .ledger div:last-child{border-bottom:0}
+  .plus{color:var(--green)} .minus{color:var(--rust)}
+  nav{position:fixed;bottom:0;left:0;right:0;border-top:1px solid var(--line);background:rgba(233,237,228,.96);backdrop-filter:blur(6px);z-index:20}
+  nav .wrap{display:flex}
+  nav button{flex:1;border:0;background:none;border-radius:0;padding:14px 0;color:var(--muted)}
+  nav button.on{color:var(--rust);font-weight:700}
+  .badge{background:var(--rust);color:#fff;border-radius:999px;padding:1px 6px;font-size:10px;margin-left:4px}
+  .toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;z-index:30;max-width:90%}
+  .hidden{display:none}
+  .warn{border:1px solid var(--rust);background:#F7E9E0;border-radius:12px;padding:14px;margin-bottom:12px}
+  .accepted{border-color:var(--green);background:var(--wash)}
+  .empty{color:var(--muted);font-size:14px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hrow">
+    <div>
+      <h1>Debug My <span>Robot</span></h1>
+      <p class="eyebrow">community hardware support</p>
+    </div>
+    <div class="who" id="who"></div>
+  </div>
+</header>
+
+<main class="wrap" id="main"></main>
+<nav><div class="wrap" id="nav"></div></nav>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+/* ==========================================================
+   Debug My Robot — single-file prototype
+   No users seeded. The first person to sign in creates their
+   own account. DEV_EMAIL below is granted the dev/moderator
+   role automatically.
+   ========================================================== */
+
+const DEV_EMAIL = "vihaangopinath2013@gmail.com";
+
+const BOARDS = ["Arduino","Raspberry Pi","ESP32","STM32","micro:bit","Other"];
+const CATEGORIES = ["power","wiring","firmware/code","sensors","motors & actuators","networking","mechanical"];
+
+const RANKS = [
+  [1,"First-Timer","#9E9E93"],[5,"Bronze Helper","#B45309"],[15,"Silver Helper","#94A3B8"],
+  [50,"Gold Helper","#EAB308"],[100,"Bronze Professional","#92400E"],[150,"Diamond Helper","#06B6D4"],
+  [200,"Silver Professional","#64748B"],[250,"Amethyst Helper","#A855F7"],[300,"Gold Professional","#CA8A04"],
+  [450,"Diamond Professional","#0891B2"],[650,"Amethyst Professional","#9333EA"],
+  [900,"Bench Veteran","#15803D"],[1200,"Board Whisperer","#14532D"]
+];
+
+const BAN_LENGTHS = [1,3,7,30];
+const MIN_ACCOUNT_AGE_DAYS = 3;
+const POST_LIMIT_PER_HOUR = 3;
+const COMMENT_LIMIT_PER_HOUR = 10;
+const DAY = 86400000;
+const KEY = "dmr:world:v1";
+
+/* ---------- storage: works hosted (localStorage) or previewed ---------- */
+const mem = {};
+const store = {
+  async get(k){
+    if (window.storage) { const r = await window.storage.get(k); return r ? r.value : null; }
+    try { return localStorage.getItem(k); } catch { return mem[k] ?? null; }
+  },
+  async set(k,v){
+    if (window.storage) { await window.storage.set(k,v); return; }
+    try { localStorage.setItem(k,v); } catch { mem[k]=v; }
+  }
+};
+
+let W = null;         // the world
+let VIEW = {name:"feed"};
+
+const now = () => Date.now();
+const uid = () => Math.random().toString(36).slice(2,10);
+const esc = s => String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const user = id => W.users.find(u=>u.id===id);
+const me = () => user(W.currentUserId);
+const coins = id => W.ledger.reduce((n,e)=> e.toUserId===id ? n+e.delta : n, 0);
+const suspended = u => u && u.suspendedUntil > now();
+
+function rank(c){ let r=[0,"Unranked","#C6CEBE"]; for(const k of RANKS) if(c>=k[0]) r=k; return r; }
+function rateBlocked(items,id,limit){
+  const cut = now()-3600000;
+  return items.filter(i=>i.authorId===id && i.createdAt>cut).length >= limit;
+}
+
+async function save(){ try{ await store.set(KEY, JSON.stringify(W)); } catch(e){ console.error(e); toast("Couldn't save — this session only."); } render(); }
+
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.remove("hidden");
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.add("hidden"), 2800);
+}
+
+function go(name, id){ VIEW = {name, id}; window.scrollTo(0,0); render(); }
+
+/* ---------- boot ---------- */
+(async function boot(){
+  const raw = await store.get(KEY);
+  W = raw ? JSON.parse(raw)
+          : { users:[], posts:[], comments:[], ledger:[], reports:[], notifications:[], currentUserId:null };
+  render();
+})();
+
+/* ---------- auth (prototype only — see notes) ---------- */
+function signIn(email, name){
+  email = email.trim().toLowerCase();
+  if(!/^\S+@\S+\.\S+$/.test(email)) return toast("That doesn't look like an email address.");
+  let u = W.users.find(x=>x.email===email);
+  if(!u){
+    if(!name.trim()) return toast("Pick a display name.");
+    if(W.users.some(x=>x.name.toLowerCase()===name.trim().toLowerCase())) return toast("That name is taken.");
+    u = { id:uid(), email, name:name.trim(), joined:now(),
+          role: email===DEV_EMAIL ? "dev" : "member", suspendedUntil:0 };
+    W.users.push(u);
+  }
+  W.currentUserId = u.id;
+  save();
+}
+function signOut(){ W.currentUserId = null; VIEW={name:"feed"}; save(); }
+
+/* ---------- render ---------- */
+function render(){
+  const main = document.getElementById("main");
+  const whoEl = document.getElementById("who");
+  const navEl = document.getElementById("nav");
+
+  if(!W.currentUserId){
+    whoEl.innerHTML = "";
+    navEl.innerHTML = "";
+    main.innerHTML = signInView();
+    wire();
+    return;
+  }
+
+  const u = me(), c = coins(u.id), r = rank(c);
+  whoEl.innerHTML = `${c} coins
+    <small><span class="dot" style="background:${r[2]}"></span> ${esc(r[1])} · ${esc(u.name)}</small>`;
+
+  const pending = W.reports.filter(x=>x.state==="open").length;
+  const unread = W.notifications.filter(n=>n.userId===u.id && !n.read).length;
+  const tabs = [["feed","Bench",0],["board","Leaders",0],["ranks","Ranks",0],["alerts","Alerts",unread]];
+  if(u.role==="dev") tabs.push(["queue","Queue",pending]);
+  tabs.push(["me","You",0]);
+  navEl.innerHTML = tabs.map(([id,label,n])=>
+    `<button data-go="${id}" class="${VIEW.name===id?"on":""}">${label}${n?`<span class="badge">${n}</span>`:""}</button>`
+  ).join("");
+
+  let html = suspended(u) ? `<div class="warn">
+      <p class="eyebrow" style="color:var(--rust)">Account suspended</p>
+      <p style="margin:4px 0 0;font-size:14px">You can read the bench but not post, comment, or report until ${new Date(u.suspendedUntil).toLocaleString()}.</p>
+    </div>` : "";
+
+  const v = VIEW.name;
+  html += v==="feed" ? feedView()
+        : v==="compose" ? composeView()
+        : v==="post" ? postView(VIEW.id)
+        : v==="ranks" ? ranksView()
+        : v==="board" ? boardView()
+        : v==="alerts" ? alertsView()
+        : v==="queue" ? queueView()
+        : v==="me" ? profileView(u.id)
+        : v==="profile" ? profileView(VIEW.id)
+        : feedView();
+
+  main.innerHTML = html;
+  wire();
+}
+
+function signInView(){
+  return `<div class="sec"><b>§00 — sign in</b><i></i></div>
+  <div class="card">
+    <h2>Nobody's here yet.</h2>
+    <p>The bench is empty. Sign in to open it — you'll be the first account.</p>
+    <label for="em">Email</label>
+    <input id="em" type="email" autocomplete="email" placeholder="you@example.com" />
+    <label for="nm">Display name — new accounts only</label>
+    <input id="nm" placeholder="how you'll appear on the bench" />
+    <div style="height:16px"></div>
+    <button class="primary" data-act="signin">Enter the bench</button>
+    <p class="meta" style="margin-top:12px">No password on this prototype. Real sign-in comes with the backend.</p>
+  </div>`;
+}
+
+function feedView(){
+  const f = feedView.f || (feedView.f = {q:"",board:"all",cat:"all",status:"all"});
+  const list = W.posts
+    .filter(p=> f.board==="all" || p.board===f.board)
+    .filter(p=> f.cat==="all" || p.category===f.cat)
+    .filter(p=> f.status==="all" || p.status===f.status)
+    .filter(p=> !f.q || (p.title+p.body).toLowerCase().includes(f.q.toLowerCase()))
+    .sort((a,b)=>b.createdAt-a.createdAt);
+
+  const opts = (arr,cur)=>arr.map(o=>`<option ${o===cur?"selected":""}>${esc(o)}</option>`).join("");
+
+  return `<div style="height:16px"></div>
+  <button class="primary" data-go="compose" ${suspended(me())?"disabled":""}>Ask the bench</button>
+  <div style="height:12px"></div>
+  <input id="q" placeholder="Search titles and descriptions" value="${esc(f.q)}" />
+  <div class="row" style="margin:8px 0 16px">
+    <select id="fb" style="width:auto">${opts(["all",...BOARDS],f.board)}</select>
+    <select id="fc" style="width:auto">${opts(["all",...CATEGORIES],f.cat)}</select>
+    <select id="fs" style="width:auto">${opts(["all","open","solved"],f.status)}</select>
+  </div>
+  ${list.length===0
+    ? `<div class="card"><p class="empty">${W.posts.length===0
+        ? "No posts yet. Whatever is misbehaving on your bench right now — that's the first one."
+        : "Nothing matches those filters. Widen them, or post the problem yourself."}</p></div>`
+    : list.map(rowHTML).join("")}`;
+}
+
+function rowHTML(p){
+  const a = user(p.authorId);
+  const n = W.comments.filter(c=>c.postId===p.id && !c.hidden).length;
+  return `<div class="card" data-go="post" data-id="${p.id}" role="button" tabindex="0" style="cursor:pointer">
+    <div class="row" style="margin-bottom:8px">
+      <span class="tag">${esc(p.board)}</span>
+      <span class="meta">${esc(p.category)}</span>
+      <span class="meta ${p.status}">● ${p.status}</span>
+    </div>
+    <h3>${esc(p.title)}</h3>
+    <p style="font-size:14px;color:#3E4F42">${esc(p.body.slice(0,140))}${p.body.length>140?"…":""}</p>
+    <p class="meta">${esc(a.name)} · ${n} ${n===1?"reply":"replies"}</p>
+  </div>`;
+}
+
+function composeView(){
+  return `<div class="sec"><b>§02 — post composer</b><i></i></div>
+  <div class="card">
+    <label for="cb">Board / platform</label>
+    <select id="cb">${BOARDS.map(b=>`<option>${b}</option>`).join("")}</select>
+    <div id="otherWrap" class="hidden"><label for="co">Board name</label><input id="co" /></div>
+    <label for="cc">Category</label>
+    <select id="cc">${CATEGORIES.map(c=>`<option>${esc(c)}</option>`).join("")}</select>
+    <label for="ct">Title</label>
+    <input id="ct" placeholder="What it does instead of what it should" />
+    <label for="cd">Description</label>
+    <textarea id="cd" rows="4" placeholder="What the robot is supposed to do, and what it's doing instead."></textarea>
+    <label for="ccode">Code snippet — optional</label>
+    <textarea id="ccode" class="code" rows="3"></textarea>
+    <label for="clog">Error log or serial output — optional</label>
+    <textarea id="clog" class="code" rows="3"></textarea>
+    <div style="height:16px"></div>
+    <button class="primary" data-act="post">Post the problem</button>
+  </div>`;
+}
+
+function codeHTML(text,label){
+  if(!text) return "";
+  const lines = text.split("\n");
+  const long = lines.length > 6;
+  return `<div class="codewrap"><button data-act="togglecode" ${long?"":'style="pointer-events:none"'}>
+      <span>${label}</span>${long?`<span>expand ${lines.length} lines</span>`:""}</button>
+    <pre data-full="${esc(text)}" data-short="${esc(lines.slice(0,6).join("\n"))}">${esc(long?lines.slice(0,6).join("\n")+"\n…":text)}</pre></div>`;
+}
+
+function postView(id){
+  const p = W.posts.find(x=>x.id===id);
+  if(!p) return `<div class="card"><p class="empty">That post is gone.</p></div>`;
+  const a = user(p.authorId);
+  const isOP = me().id === p.authorId;
+  const list = W.comments.filter(c=>c.postId===p.id && !c.hidden);
+
+  const comments = list.map(c=>{
+    const ca = user(c.authorId), r = rank(coins(c.authorId));
+    const acc = p.acceptedCommentId===c.id;
+    return `<div class="card ${acc?"accepted":""}">
+      <div class="row" style="margin-bottom:4px">
+        <button class="meta" style="border:0;padding:0;text-decoration:underline" data-go="profile" data-id="${ca.id}">${esc(ca.name)}</button>
+        <span class="dot" style="background:${r[2]}"></span><span class="meta">${esc(r[1])}</span>
+      </div>
+      <p style="font-size:14px">${esc(c.body)}</p>
+      ${codeHTML(c.code,"code")}
+      <div class="row" style="margin-top:12px">
+        ${acc?`<span style="background:var(--green);color:#fff;border-radius:8px;padding:4px 8px;font-family:var(--mono);font-size:11px">✓ accepted solution</span>`:""}
+        ${isOP && c.authorId!==me().id ? `<button class="ghost" data-act="award" data-id="${c.id}">${acc?"It worked! (current)":"✓ It worked!"}</button>
+          <button class="danger" data-act="report" data-id="${c.id}">report</button>` : ""}
+        ${isOP && c.authorId===me().id ? `<span class="meta">can't credit your own comment</span>` : ""}
+      </div>
+      <div class="hidden" id="rep_${c.id}" style="margin-top:12px">
+        <label>Why are you reporting this?</label>
+        <div class="row">
+          ${["spam","unhelpful","abusive","off-topic"].map(x=>`<button data-act="filereport" data-id="${c.id}" data-reason="${x}">${x}</button>`).join("")}
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+
+  return `<div style="height:12px"></div>
+  <button data-go="feed" style="border:0;background:none;padding:0" class="meta">← bench</button>
+  <div style="height:12px"></div>
+  <div class="card">
+    <div class="row" style="margin-bottom:8px">
+      <span class="tag">${esc(p.board)}</span>
+      <span class="meta">${esc(p.category)}</span>
+      <span class="meta ${p.status}">● ${p.status}</span>
+    </div>
+    <h2>${esc(p.title)}</h2>
+    <button class="meta" style="border:0;padding:0;text-decoration:underline" data-go="profile" data-id="${a.id}">${esc(a.name)}</button>
+    <p style="font-size:14px">${esc(p.body)}</p>
+    ${codeHTML(p.code,"code")}
+    ${codeHTML(p.log,"log output")}
+  </div>
+
+  <div class="sec"><b>§03 — comments &amp; verification</b><i></i></div>
+  ${list.length===0?`<div class="card"><p class="empty">No replies yet. Be the one who knows why.</p></div>`:comments}
+
+  <div class="card">
+    <label for="rb">Your reply</label>
+    <textarea id="rb" rows="3" ${suspended(me())?"disabled":""}></textarea>
+    <label for="rc">Code — optional</label>
+    <textarea id="rc" class="code" rows="2" ${suspended(me())?"disabled":""}></textarea>
+    <div style="height:12px"></div>
+    <button class="primary" data-act="reply" data-id="${p.id}" ${suspended(me())?"disabled":""}>Send reply</button>
+  </div>`;
+}
+
+function ranksView(){
+  const c = coins(me().id);
+  return `<div class="sec"><b>§04 — knowledge coins &amp; the helper ladder</b><i></i></div>
+  <p style="font-size:14px">Coins accumulate for life. Two tracks — Helper and Professional — leapfrog each other before both cap out.</p>
+  <div class="card" style="padding:0;overflow:hidden"><table>
+    ${RANKS.map(([at,name,col])=>`<tr class="${c>=at?"hit":""}">
+      <td class="n">${at}</td><td>${name}</td>
+      <td style="width:30px"><span class="dot" style="background:${col}"></span></td></tr>`).join("")}
+  </table></div>`;
+}
+
+function boardView(){
+  const span = boardView.span || (boardView.span="all");
+  const cut = span==="week" ? now()-7*DAY : 0;
+  const rows = W.users.map(u=>({u, c: W.ledger.filter(e=>e.toUserId===u.id && e.at>=cut).reduce((n,e)=>n+e.delta,0)}))
+    .filter(r=>r.c>0).sort((a,b)=>b.c-a.c);
+  return `<div class="sec"><b>§06 — leaderboard</b><i></i></div>
+  <div class="row" style="margin-bottom:12px">
+    <button data-act="span" data-v="week" class="${span==="week"?"primary":""}" style="width:auto">this week</button>
+    <button data-act="span" data-v="all" class="${span==="all"?"primary":""}" style="width:auto">all time</button>
+  </div>
+  ${rows.length===0
+    ? `<div class="card"><p class="empty">No coins awarded yet. Solve something.</p></div>`
+    : `<div class="card" style="padding:0;overflow:hidden"><table>${rows.map((r,i)=>
+        `<tr><td class="n" style="color:var(--rust)">${i+1}</td><td>${esc(r.u.name)}</td><td class="n" style="text-align:right">${r.c}</td></tr>`).join("")}</table></div>`}`;
+}
+
+function profileView(id){
+  const u = user(id), c = coins(id), r = rank(c);
+  const entries = W.ledger.filter(e=>e.toUserId===id).sort((a,b)=>b.at-a.at);
+  const earned = RANKS.filter(k=>c>=k[0]);
+  const isSelf = id===me().id;
+  return `<div style="height:12px"></div>
+  <div class="card">
+    <h2>${esc(u.name)}</h2>
+    <p class="meta"><span class="dot" style="background:${r[2]}"></span> ${esc(r[1])} · ${c} coins · joined ${new Date(u.joined).toLocaleDateString()}${u.role==="dev"?" · dev":""}</p>
+    <div class="row" style="margin-top:10px">${earned.map(k=>`<span class="tag">${k[1]}</span>`).join("")}</div>
+    ${isSelf?`<div style="height:14px"></div><button data-act="signout">Sign out</button>`:""}
+  </div>
+  <div class="sec"><b>coin ledger</b><i></i></div>
+  <p style="font-size:14px">Append-only. Credit that moves is written as a reversal, never erased.</p>
+  <div class="ledger">${entries.length===0?`<span class="empty">no entries</span>`:entries.map(e=>
+    `<div><span class="${e.delta>0?"plus":"minus"}">${e.delta>0?"+1":"−1"}</span>
+     <span style="flex:1;color:#3E4F42">${esc(e.reason)}</span>
+     <span style="color:#8A9488">${new Date(e.at).toLocaleDateString()}</span></div>`).join("")}</div>`;
+}
+
+function alertsView(){
+  const mine = W.notifications.filter(n=>n.userId===me().id);
+  if(mine.some(n=>!n.read)){
+    W.notifications.forEach(n=>{ if(n.userId===me().id) n.read=true; });
+    store.set(KEY, JSON.stringify(W));
+  }
+  return `<div class="sec"><b>§06 — notifications</b><i></i></div>
+  ${mine.length===0
+    ? `<div class="card"><p class="empty">Nothing yet. Replies, credits, and review outcomes land here.</p></div>`
+    : mine.map(n=>`<div class="card" ${n.postId?`data-go="post" data-id="${n.postId}" role="button" tabindex="0" style="cursor:pointer"`:""}>
+        <p style="margin:0;font-size:14px">${esc(n.text)}</p>
+        <p class="meta" style="margin:4px 0 0">${new Date(n.createdAt).toLocaleString()}</p></div>`).join("")}`;
+}
+
+function queueView(){
+  const open = W.reports.filter(r=>r.state==="open");
+  return `<div class="sec"><b>§05 — trust &amp; safety</b><i></i></div>
+  <p style="font-size:14px">Coins are never at stake in a report — only the comment and the commenter's standing.</p>
+  ${open.length===0?`<div class="card"><p class="empty">Queue is clear.</p></div>`:open.map(r=>{
+    const c = W.comments.find(x=>x.id===r.commentId);
+    const p = W.posts.find(x=>x.id===r.postId);
+    const ca = user(c.authorId), rep = user(r.reporterId);
+    return `<div class="card">
+      <p class="eyebrow" style="color:var(--rust)">reason — ${esc(r.reason)}</p>
+      <p class="meta">on "${esc(p.title)}" · comment by ${esc(ca.name)} · reported by ${esc(rep.name)}</p>
+      <p style="background:#F1F3EE;border-radius:10px;padding:12px;font-size:14px">${esc(c.body)}</p>
+      <div class="row" style="margin-top:12px">
+        <button data-act="decide" data-id="${r.id}" data-d="dismiss">dismiss</button>
+        <button class="danger" data-act="decide" data-id="${r.id}" data-d="warn">warn + remove</button>
+      </div>
+      <label>Suspend — length is your call</label>
+      <div class="row">
+        ${BAN_LENGTHS.map(d=>`<button data-act="decide" data-id="${r.id}" data-d="suspend" data-days="${d}">${d} ${d===1?"day":"days"}</button>`).join("")}
+        <input class="code" id="cus_${r.id}" type="number" min="1" placeholder="N" style="width:70px" />
+        <button class="danger" data-act="decidecustom" data-id="${r.id}">custom</button>
+      </div>
+    </div>`;
+  }).join("")}`;
+}
+
+/* ---------- actions ---------- */
+
+function addPost(){
+  const board = document.getElementById("cb").value;
+  const other = (document.getElementById("co")||{}).value || "";
+  const title = document.getElementById("ct").value.trim();
+  const body  = document.getElementById("cd").value.trim();
+  if(!title || !body) return toast("A title and a description are required.");
+  if(board==="Other" && !other.trim()) return toast("Name the board so helpers know what they're looking at.");
+  if(rateBlocked(W.posts, me().id, POST_LIMIT_PER_HOUR)) return toast(`Post limit reached — ${POST_LIMIT_PER_HOUR} per hour.`);
+  const p = { id:uid(), authorId:me().id, board: board==="Other"?other.trim():board,
+    category: document.getElementById("cc").value, title, body,
+    code: document.getElementById("ccode").value, log: document.getElementById("clog").value,
+    status:"open", acceptedCommentId:null, createdAt:now() };
+  W.posts.unshift(p); VIEW={name:"post",id:p.id}; save(); toast("Posted to the bench.");
+}
+
+function addComment(postId){
+  const body = document.getElementById("rb").value.trim();
+  if(!body) return;
+  if(rateBlocked(W.comments, me().id, COMMENT_LIMIT_PER_HOUR)) return toast(`Comment limit reached — ${COMMENT_LIMIT_PER_HOUR} per hour.`);
+  const p = W.posts.find(x=>x.id===postId);
+  W.comments.push({ id:uid(), postId, authorId:me().id, body, code:document.getElementById("rc").value, createdAt:now(), hidden:false });
+  if(p.authorId!==me().id) W.notifications.unshift({ id:uid(), userId:p.authorId, text:`${me().name} replied to "${p.title}"`, postId, read:false, createdAt:now() });
+  save();
+}
+
+function award(commentId){
+  const c = W.comments.find(x=>x.id===commentId);
+  const p = W.posts.find(x=>x.id===c.postId);
+  const helper = user(c.authorId);
+  if((now()-helper.joined)/DAY < MIN_ACCOUNT_AGE_DAYS)
+    return toast(`Marked as the fix, but no coin: accounts pay out after ${MIN_ACCOUNT_AGE_DAYS} days.`);
+  if(p.acceptedCommentId && p.acceptedCommentId!==c.id){
+    const prev = W.comments.find(x=>x.id===p.acceptedCommentId);
+    if(prev) W.ledger.push({ id:uid(), toUserId:prev.authorId, delta:-1, reason:`credit moved off an earlier comment on "${p.title}"`, postId:p.id, at:now() });
+  }
+  if(p.acceptedCommentId!==c.id){
+    W.ledger.push({ id:uid(), toUserId:c.authorId, delta:1, reason:`accepted solution on "${p.title}"`, postId:p.id, at:now() });
+    W.notifications.unshift({ id:uid(), userId:c.authorId, text:`Your comment on "${p.title}" was marked It worked! (+1 coin)`, postId:p.id, read:false, createdAt:now() });
+  }
+  p.acceptedCommentId = c.id; p.status = "solved";
+  save(); toast("Marked as the fix. +1 Knowledge Coin.");
+}
+
+function fileReport(commentId, reason){
+  const c = W.comments.find(x=>x.id===commentId);
+  W.reports.unshift({ id:uid(), commentId, postId:c.postId, reporterId:me().id, reason, state:"open", createdAt:now() });
+  save(); toast("Report sent to the review queue.");
+}
+
+function decide(reportId, action, days){
+  const r = W.reports.find(x=>x.id===reportId);
+  const c = W.comments.find(x=>x.id===r.commentId);
+  let text;
+  if(action==="dismiss"){
+    text = "A report on your comment was reviewed and dismissed. No action taken.";
+  } else if(action==="warn"){
+    c.hidden = true;
+    text = `Your comment was removed (${r.reason}). This is a warning — no suspension.`;
+  } else {
+    c.hidden = true;
+    user(c.authorId).suspendedUntil = now() + days*DAY;
+    text = `Your comment was removed (${r.reason}) and your account is suspended for ${days} ${days===1?"day":"days"}.`;
+  }
+  r.state = action; r.days = days||0; r.reviewedBy = me().id;
+  W.notifications.unshift({ id:uid(), userId:c.authorId, text, postId:r.postId, read:false, createdAt:now() });
+  W.notifications.unshift({ id:uid(), userId:r.reporterId, text:`Your report was reviewed — outcome: ${action}.`, postId:r.postId, read:false, createdAt:now() });
+  save(); toast(`Decision recorded: ${action}.`);
+}
+
+/* ---------- event wiring ---------- */
+function wire(){
+  document.querySelectorAll("[data-go]").forEach(el=>{
+    el.addEventListener("click", e=>{ e.stopPropagation(); go(el.dataset.go, el.dataset.id); });
+    el.addEventListener("keydown", e=>{ if(e.key==="Enter") go(el.dataset.go, el.dataset.id); });
+  });
+
+  document.querySelectorAll("[data-act]").forEach(el=>{
+    el.addEventListener("click", e=>{
+      e.stopPropagation();
+      const a = el.dataset.act;
+      if(a==="signin") signIn(document.getElementById("em").value, document.getElementById("nm").value);
+      else if(a==="signout") signOut();
+      else if(a==="post") addPost();
+      else if(a==="reply") addComment(el.dataset.id);
+      else if(a==="award") award(el.dataset.id);
+      else if(a==="report") document.getElementById("rep_"+el.dataset.id).classList.toggle("hidden");
+      else if(a==="filereport") fileReport(el.dataset.id, el.dataset.reason);
+      else if(a==="decide") decide(el.dataset.id, el.dataset.d, Number(el.dataset.days||0));
+      else if(a==="decidecustom"){
+        const n = Number(document.getElementById("cus_"+el.dataset.id).value);
+        if(n>0) decide(el.dataset.id,"suspend",n); else toast("Enter a number of days.");
+      }
+      else if(a==="span"){ boardView.span = el.dataset.v; render(); }
+      else if(a==="togglecode"){
+        const pre = el.nextElementSibling;
+        const showing = pre.dataset.state==="full";
+        pre.textContent = showing ? pre.dataset.short+"\n…" : pre.dataset.full;
+        pre.dataset.state = showing ? "short" : "full";
+        el.lastElementChild.textContent = showing ? "expand" : "collapse";
+      }
+    });
+  });
+
+  const q = document.getElementById("q");
+  if(q) q.addEventListener("input", e=>{ feedView.f.q = e.target.value; render(); document.getElementById("q").focus(); });
+  const bind = (id,k)=>{ const el=document.getElementById(id); if(el) el.addEventListener("change", e=>{ feedView.f[k]=e.target.value; render(); }); };
+  bind("fb","board"); bind("fc","cat"); bind("fs","status");
+
+  const cb = document.getElementById("cb");
+  if(cb) cb.addEventListener("change", e=>{
+    document.getElementById("otherWrap").classList.toggle("hidden", e.target.value!=="Other");
+  });
+}
+</script>
+</body>
+</html>
